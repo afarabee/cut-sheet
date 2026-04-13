@@ -97,10 +97,10 @@ export function TargetsForm({ onSuccess }: TargetsFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      {/* Macro inputs — protein, carbs, fat drive calories */}
-      <MacroInput label="Protein" unit="g" value={protein} onChange={setProtein} />
-      <MacroInput label="Carbs" unit="g" value={carbs} onChange={setCarbs} />
+      {/* Macro inputs in nutrition label order — fat, carbs, protein drive calories */}
       <MacroInput label="Fat" unit="g" value={fat} onChange={setFat} />
+      <MacroInput label="Carbs" unit="g" value={carbs} onChange={setCarbs} />
+      <MacroInput label="Protein" unit="g" value={protein} onChange={setProtein} />
 
       {/* Calories — auto-calculated with manual override */}
       <div>
@@ -127,7 +127,7 @@ export function TargetsForm({ onSuccess }: TargetsFormProps) {
         {/* Show the math */}
         {(protein || carbs || fat) && (
           <p className="mt-1 pl-[7.75rem] text-xs text-muted-foreground">
-            P({protein || 0})×4 + C({carbs || 0})×4 + F({fat || 0})×9 = {calculatedCalories} cal
+            F({fat || 0})×9 + C({carbs || 0})×4 + P({protein || 0})×4 = {calculatedCalories} cal
           </p>
         )}
 

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Star } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,18 +32,21 @@ export function FoodForm({
   const [calories, setCalories] = useState(
     initialValues?.calories?.toString() ?? ''
   )
-  const [protein, setProtein] = useState(
-    initialValues?.protein_g?.toString() ?? ''
-  )
+  const [fat, setFat] = useState(initialValues?.fat_g?.toString() ?? '')
   const [carbs, setCarbs] = useState(
     initialValues?.carbs_g?.toString() ?? ''
   )
-  const [fat, setFat] = useState(initialValues?.fat_g?.toString() ?? '')
+  const [protein, setProtein] = useState(
+    initialValues?.protein_g?.toString() ?? ''
+  )
   const [fiber, setFiber] = useState(
     initialValues?.fiber_g?.toString() ?? ''
   )
   const [totalSugars, setTotalSugars] = useState(
     initialValues?.total_sugars_g?.toString() ?? ''
+  )
+  const [isFavorite, setIsFavorite] = useState(
+    initialValues?.is_favorite ?? false
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -54,12 +59,13 @@ export function FoodForm({
       serving_size: servingSize ? Number(servingSize) : null,
       serving_unit: servingUnit,
       calories: calories ? Number(calories) : null,
-      protein_g: protein ? Number(protein) : null,
-      carbs_g: carbs ? Number(carbs) : null,
       fat_g: fat ? Number(fat) : null,
+      carbs_g: carbs ? Number(carbs) : null,
+      protein_g: protein ? Number(protein) : null,
       fiber_g: fiber ? Number(fiber) : null,
       total_sugars_g: totalSugars ? Number(totalSugars) : null,
       source: initialValues?.source ?? 'custom',
+      is_favorite: isFavorite,
     })
   }
 
@@ -104,7 +110,7 @@ export function FoodForm({
           <select
             value={servingUnit}
             onChange={(e) => setServingUnit(e.target.value)}
-            className="mt-1 h-8 w-full rounded-lg border border-input bg-transparent px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="mt-1 h-8 w-full rounded-lg border border-input bg-card px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&>option]:bg-[#12122a] [&>option]:text-[#e8e0f0]"
           >
             {SERVING_UNITS.map((u) => (
               <option key={u} value={u}>
@@ -115,6 +121,7 @@ export function FoodForm({
         </div>
       </div>
 
+      {/* Macro order matches nutrition labels: Calories, Fat, Carbs, Fiber, Sugars, Protein */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label>Calories</Label>
@@ -130,14 +137,14 @@ export function FoodForm({
           />
         </div>
         <div>
-          <Label>Protein (g)</Label>
+          <Label>Fat (g)</Label>
           <Input
             type="number"
             inputMode="decimal"
             min={0}
             step="any"
-            value={protein}
-            onChange={(e) => setProtein(e.target.value)}
+            value={fat}
+            onChange={(e) => setFat(e.target.value)}
             placeholder="—"
             className="mt-1"
           />
@@ -151,19 +158,6 @@ export function FoodForm({
             step="any"
             value={carbs}
             onChange={(e) => setCarbs(e.target.value)}
-            placeholder="—"
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label>Fat (g)</Label>
-          <Input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="any"
-            value={fat}
-            onChange={(e) => setFat(e.target.value)}
             placeholder="—"
             className="mt-1"
           />
@@ -194,7 +188,38 @@ export function FoodForm({
             className="mt-1"
           />
         </div>
+        <div>
+          <Label>Protein (g)</Label>
+          <Input
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step="any"
+            value={protein}
+            onChange={(e) => setProtein(e.target.value)}
+            placeholder="—"
+            className="mt-1"
+          />
+        </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setIsFavorite(!isFavorite)}
+        className="flex items-center gap-2 self-start rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-muted/50"
+      >
+        <Star
+          className={cn(
+            'h-4 w-4 transition-colors',
+            isFavorite
+              ? 'fill-primary text-primary'
+              : 'text-muted-foreground'
+          )}
+        />
+        <span className={isFavorite ? 'text-primary' : 'text-muted-foreground'}>
+          {isFavorite ? 'Favorited' : 'Add to favorites'}
+        </span>
+      </button>
 
       <Button
         type="submit"

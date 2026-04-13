@@ -32,7 +32,7 @@ export function PortionSheet({
     <div className="fixed inset-0 z-50 flex items-end" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full rounded-t-2xl border-t border-border bg-card p-5 pb-8"
+        className="relative w-full max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-card p-5 pb-[env(safe-area-inset-bottom,2rem)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/30" />
@@ -69,26 +69,35 @@ export function PortionSheet({
             <p className="text-xs text-muted-foreground">cal</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-neon-green">{protein}g</p>
-            <p className="text-xs text-muted-foreground">protein</p>
+            <p className="text-lg font-bold text-neon-pink">{fat}g</p>
+            <p className="text-xs text-muted-foreground">fat</p>
           </div>
           <div className="text-center">
             <p className="text-lg font-bold text-neon-purple">{carbs}g</p>
             <p className="text-xs text-muted-foreground">carbs</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-neon-pink">{fat}g</p>
-            <p className="text-xs text-muted-foreground">fat</p>
+            <p className="text-lg font-bold text-neon-green">{protein}g</p>
+            <p className="text-xs text-muted-foreground">protein</p>
           </div>
         </div>
 
-        <Button
-          onClick={() => onConfirm(servings)}
-          disabled={isPending}
-          className="mt-6 h-12 w-full text-base font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)]"
-        >
-          {isPending ? 'Logging...' : 'Log It'}
-        </Button>
+        <div className="mt-6 flex flex-col gap-2">
+          <Button
+            onClick={() => onConfirm(servings)}
+            disabled={isPending}
+            className="h-12 w-full text-base font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)]"
+          >
+            {isPending ? 'Logging...' : 'Log It'}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={onCancel}
+            className="w-full text-muted-foreground"
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
     </div>
   )

@@ -36,22 +36,16 @@ export default function Dashboard() {
 
           <div className="mt-6 flex flex-col gap-3">
             <MacroBar
-              label="Protein"
-              current={totals.protein_g}
-              target={targets?.protein_g ?? null}
-              color={MACRO_COLORS.protein}
+              label="Fat"
+              current={totals.fat_g}
+              target={targets?.fat_g ?? null}
+              color={MACRO_COLORS.fat}
             />
             <MacroBar
               label="Carbs"
               current={totals.carbs_g}
               target={targets?.carbs_g ?? null}
               color={MACRO_COLORS.carbs}
-            />
-            <MacroBar
-              label="Fat"
-              current={totals.fat_g}
-              target={targets?.fat_g ?? null}
-              color={MACRO_COLORS.fat}
             />
             <MacroBar
               label="Fiber"
@@ -64,6 +58,12 @@ export default function Dashboard() {
               current={totals.total_sugars_g}
               target={targets?.total_sugars_g ?? null}
               color={MACRO_COLORS.total_sugars}
+            />
+            <MacroBar
+              label="Protein"
+              current={totals.protein_g}
+              target={targets?.protein_g ?? null}
+              color={MACRO_COLORS.protein}
             />
           </div>
 

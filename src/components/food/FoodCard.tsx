@@ -42,9 +42,9 @@ export function FoodCard({
         )}
         <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
           <span>{food.calories ?? 0} cal</span>
-          <span className="text-neon-green">P {food.protein_g ?? 0}g</span>
-          <span className="text-neon-purple">C {food.carbs_g ?? 0}g</span>
           <span className="text-neon-pink">F {food.fat_g ?? 0}g</span>
+          <span className="text-neon-purple">C {food.carbs_g ?? 0}g</span>
+          <span className="text-neon-green">P {food.protein_g ?? 0}g</span>
         </div>
         <p className="mt-0.5 text-[10px] text-muted-foreground/60">
           per {food.serving_size ?? 100}{food.serving_unit ?? 'g'}

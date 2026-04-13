@@ -6,6 +6,7 @@ interface ProgressProps extends React.ComponentProps<"div"> {
   value?: number
   max?: number
   indicatorClassName?: string
+  indicatorColor?: string
 }
 
 function Progress({
@@ -13,6 +14,7 @@ function Progress({
   value = 0,
   max = 100,
   indicatorClassName,
+  indicatorColor,
   ...props
 }: ProgressProps) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100)
@@ -33,10 +35,14 @@ function Progress({
       <div
         data-slot="progress-indicator"
         className={cn(
-          "h-full rounded-full bg-primary transition-all duration-500 ease-out",
+          "h-full rounded-full transition-all duration-500 ease-out",
+          !indicatorColor && "bg-primary",
           indicatorClassName
         )}
-        style={{ width: `${percentage}%` }}
+        style={{
+          width: `${percentage}%`,
+          ...(indicatorColor ? { backgroundColor: indicatorColor } : {}),
+        }}
       />
     </div>
   )

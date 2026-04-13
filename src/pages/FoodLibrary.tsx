@@ -6,15 +6,28 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FoodCard } from '@/components/food/FoodCard'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useFoods, useDeleteFood, useToggleFavorite } from '@/hooks/useFoods'
+import type { Food } from '@/types'
 
 export default function FoodLibrary() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [favoritesOnly, setFavoritesOnly] = useState(false)
+  const [deletingFood, setDeletingFood] = useState<Food | null>(null)
   const { data: foods, isLoading } = useFoods(search, favoritesOnly)
   const deleteFood = useDeleteFood()
   const toggleFavorite = useToggleFavorite()
+
+  const handleConfirmDelete = () => {
+    if (!deletingFood) return
+    deleteFood.mutate(deletingFood.id, {
+      onSuccess: () => {
+        toast.success(`${deletingFood.name} deleted`)
+        setDeletingFood(null)
+      },
+    })
+  }
 
   return (
     <div className="mx-auto max-w-lg p-4 pt-6">
@@ -57,9 +70,9 @@ export default function FoodLibrary() {
       ) : !foods?.length ? (
         <div className="py-12 text-center">
           <p className="text-muted-foreground">
-            {search ? 'No foods match your search' : 'No foods saved yet'}
+            {search || favoritesOnly ? 'No foods match your filter' : 'No foods saved yet'}
           </p>
-          {!search && (
+          {!search && !favoritesOnly && (
             <Button
               variant="outline"
               className="mt-4"
@@ -86,11 +99,7 @@ export default function FoodLibrary() {
               />
               <button
                 type="button"
-                onClick={() => {
-                  deleteFood.mutate(food.id, {
-                    onSuccess: () => toast.success(`${food.name} deleted`),
-                  })
-                }}
+                onClick={() => setDeletingFood(food)}
                 className="absolute right-2 top-2 hidden rounded p-1 text-destructive hover:bg-destructive/10 group-hover:block"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -98,6 +107,16 @@ export default function FoodLibrary() {
             </div>
           ))}
         </div>
+      )}
+
+      {deletingFood && (
+        <ConfirmDialog
+          title="Delete food?"
+          message={`Remove "${deletingFood.name}" from your food library? This won't affect existing log entries.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeletingFood(null)}
+          isPending={deleteFood.isPending}
+        />
       )}
     </div>
   )

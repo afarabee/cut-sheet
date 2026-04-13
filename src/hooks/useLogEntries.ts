@@ -22,22 +22,57 @@ export function useAddLogEntry() {
 
   return useMutation({
     mutationFn: async (entry: LogEntryInput) => {
-      console.log('[Cut Sheet] Inserting log entry:', entry)
       const { data, error } = await supabase
         .from('cut_log_entries')
         .insert(entry)
         .select()
         .single()
-      if (error) {
-        console.error('[Cut Sheet] Insert error:', error)
-        throw error
-      }
-      console.log('[Cut Sheet] Insert success:', data)
+      if (error) throw error
       return data as LogEntry
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['log-entries', data.logged_at] })
       queryClient.invalidateQueries({ queryKey: ['foods', 'recents'] })
+    },
+  })
+}
+
+export function useUpdateLogEntry() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      serving_qty,
+      calories,
+      protein_g,
+      carbs_g,
+      fat_g,
+      fiber_g,
+      total_sugars_g,
+      date,
+    }: {
+      id: string
+      serving_qty: number
+      calories: number
+      protein_g: number
+      carbs_g: number
+      fat_g: number
+      fiber_g: number
+      total_sugars_g: number
+      date: string
+    }) => {
+      const { data, error } = await supabase
+        .from('cut_log_entries')
+        .update({ serving_qty, calories, protein_g, carbs_g, fat_g, fiber_g, total_sugars_g })
+        .eq('id', id)
+        .select()
+        .single()
+      if (error) throw error
+      return { entry: data as LogEntry, date }
+    },
+    onSuccess: ({ date }) => {
+      queryClient.invalidateQueries({ queryKey: ['log-entries', date] })
     },
   })
 }

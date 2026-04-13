@@ -131,13 +131,25 @@ export function TargetsForm({ onSuccess }: TargetsFormProps) {
           </p>
         )}
 
-        {/* Mismatch warning */}
+        {/* Mismatch warning + fix button */}
         {mismatch > 5 && (
-          <div className="mt-1.5 flex items-start gap-1.5 pl-[7.75rem]">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" />
-            <p className="text-xs text-secondary">
-              Manual calories ({caloriesOverride}) differ from macro math ({calculatedCalories}) by {Math.round(mismatch)} cal
-            </p>
+          <div className="mt-1.5 pl-[7.75rem]">
+            <div className="flex items-start gap-1.5">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" />
+              <p className="text-xs text-secondary">
+                Manual calories ({caloriesOverride}) differ from macro math ({calculatedCalories}) by {Math.round(mismatch)} cal
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCaloriesManual(false)
+                setCaloriesOverride('')
+              }}
+              className="mt-1 text-xs font-medium text-primary hover:underline"
+            >
+              Use calculated value ({calculatedCalories} cal)
+            </button>
           </div>
         )}
       </div>

@@ -1,26 +1,33 @@
 import { useState } from 'react'
 import { Minus, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import type { Food } from '@/types'
 import type { USDASearchResult } from '@/lib/usda'
 
 interface PortionSheetProps {
   food: Food | USDASearchResult
+  initialServings?: number
   onConfirm: (servings: number) => void
   onCancel: () => void
   isPending?: boolean
+  confirmLabel?: string
 }
 
 export function PortionSheet({
   food,
+  initialServings = 1,
   onConfirm,
   onCancel,
   isPending,
+  confirmLabel = 'Log It',
 }: PortionSheetProps) {
-  const [servings, setServings] = useState(1)
+  const [servingsInput, setServingsInput] = useState(String(initialServings))
+  const servings = Number(servingsInput) || 0
 
   const adjust = (delta: number) => {
-    setServings((prev) => Math.max(0.5, Math.round((prev + delta) * 10) / 10))
+    const next = Math.max(0.1, Math.round((servings + delta) * 10) / 10)
+    setServingsInput(String(next))
   }
 
   const cal = Math.round((food.calories ?? 0) * servings)
@@ -45,7 +52,7 @@ export function PortionSheet({
           per {food.serving_size ?? 100}{food.serving_unit ?? 'g'}
         </p>
 
-        <div className="mt-4 flex items-center justify-center gap-4">
+        <div className="mt-4 flex items-center justify-center gap-3">
           <Button
             variant="outline"
             size="icon"
@@ -54,9 +61,15 @@ export function PortionSheet({
           >
             <Minus className="h-4 w-4" />
           </Button>
-          <span className="min-w-[3rem] text-center text-2xl font-bold text-foreground">
-            {servings}
-          </span>
+          <Input
+            type="number"
+            inputMode="decimal"
+            min={0.1}
+            step="any"
+            value={servingsInput}
+            onChange={(e) => setServingsInput(e.target.value)}
+            className="h-10 w-20 text-center text-xl font-bold"
+          />
           <Button variant="outline" size="icon" onClick={() => adjust(0.5)}>
             <Plus className="h-4 w-4" />
           </Button>
@@ -85,10 +98,10 @@ export function PortionSheet({
         <div className="mt-6 flex flex-col gap-2">
           <Button
             onClick={() => onConfirm(servings)}
-            disabled={isPending}
+            disabled={isPending || servings <= 0}
             className="h-12 w-full text-base font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)]"
           >
-            {isPending ? 'Logging...' : 'Log It'}
+            {isPending ? 'Saving...' : confirmLabel}
           </Button>
           <Button
             variant="ghost"

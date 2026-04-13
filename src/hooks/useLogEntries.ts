@@ -22,16 +22,22 @@ export function useAddLogEntry() {
 
   return useMutation({
     mutationFn: async (entry: LogEntryInput) => {
+      console.log('[Cut Sheet] Inserting log entry:', entry)
       const { data, error } = await supabase
         .from('cut_log_entries')
         .insert(entry)
         .select()
         .single()
-      if (error) throw error
+      if (error) {
+        console.error('[Cut Sheet] Insert error:', error)
+        throw error
+      }
+      console.log('[Cut Sheet] Insert success:', data)
       return data as LogEntry
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['log-entries', data.logged_at] })
+      queryClient.invalidateQueries({ queryKey: ['foods', 'recents'] })
     },
   })
 }

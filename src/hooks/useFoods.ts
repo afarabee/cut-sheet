@@ -2,9 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Food, FoodInput } from '@/types'
 
-export function useFoods(searchQuery?: string) {
+export function useFoods(searchQuery?: string, favoritesOnly?: boolean) {
   return useQuery<Food[]>({
-    queryKey: ['foods', searchQuery ?? ''],
+    queryKey: ['foods', searchQuery ?? '', favoritesOnly ? 'fav' : 'all'],
     queryFn: async () => {
       let query = supabase
         .from('cut_foods')
@@ -13,6 +13,10 @@ export function useFoods(searchQuery?: string) {
 
       if (searchQuery && searchQuery.trim().length >= 2) {
         query = query.ilike('name', `%${searchQuery.trim()}%`)
+      }
+
+      if (favoritesOnly) {
+        query = query.eq('is_favorite', true)
       }
 
       const { data, error } = await query.limit(50)

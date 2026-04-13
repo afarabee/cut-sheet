@@ -43,6 +43,7 @@ export default function LogFood() {
   }
 
   const handleLog = async (servings: number) => {
+    console.log('[Cut Sheet] handleLog called with servings:', servings, 'food:', selectedFood)
     if (!selectedFood) return
 
     let foodId: string | null = null
@@ -88,7 +89,8 @@ export default function LogFood() {
           setPendingUSDA(null)
           setSearchQuery('')
         },
-        onError: () => {
+        onError: (err) => {
+          console.error('[Cut Sheet] Log food error:', err)
           toast.error('Failed to log food')
         },
       }

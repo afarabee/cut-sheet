@@ -29,10 +29,10 @@ export function PortionSheet({
   const fat = Math.round((food.fat_g ?? 0) * servings * 10) / 10
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end" onClick={onCancel}>
+    <div className="fixed inset-0 z-[60] flex items-end" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-card p-5 pb-[env(safe-area-inset-bottom,2rem)]"
+        className="relative w-full max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-card p-5 pb-24"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/30" />

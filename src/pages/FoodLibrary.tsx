@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Star, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FoodCard } from '@/components/food/FoodCard'
@@ -10,7 +11,8 @@ import { useFoods, useDeleteFood, useToggleFavorite } from '@/hooks/useFoods'
 export default function FoodLibrary() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
-  const { data: foods, isLoading } = useFoods(search)
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
+  const { data: foods, isLoading } = useFoods(search, favoritesOnly)
   const deleteFood = useDeleteFood()
   const toggleFavorite = useToggleFavorite()
 
@@ -24,7 +26,7 @@ export default function FoodLibrary() {
         </Button>
       </div>
 
-      <div className="relative mb-4">
+      <div className="relative mb-3">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
@@ -33,6 +35,22 @@ export default function FoodLibrary() {
           className="pl-9"
         />
       </div>
+
+      <label className="mb-4 flex cursor-pointer items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setFavoritesOnly(!favoritesOnly)}
+          className={cn(
+            'flex h-5 w-5 items-center justify-center rounded border transition-colors',
+            favoritesOnly
+              ? 'border-primary bg-primary'
+              : 'border-border bg-transparent hover:border-muted-foreground'
+          )}
+        >
+          {favoritesOnly && <Star className="h-3 w-3 fill-primary-foreground text-primary-foreground" />}
+        </button>
+        <span className="text-sm text-muted-foreground">Favorites only</span>
+      </label>
 
       {isLoading ? (
         <p className="py-8 text-center text-muted-foreground">Loading...</p>

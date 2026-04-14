@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { ChevronDown, Pencil, Trash2 } from 'lucide-react'
+import { Bookmark, ChevronDown, Copy, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { MEAL_LABELS, type MealType } from '@/lib/constants'
 import { useDeleteLogEntry, useUpdateLogEntry } from '@/hooks/useLogEntries'
 import { PortionSheet } from '@/components/log/PortionSheet'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { CreateTemplateSheet } from '@/components/templates/CreateTemplateSheet'
+import { CopyMealSheet } from '@/components/dashboard/CopyMealSheet'
 import type { LogEntry, Food } from '@/types'
 
 interface MealSummaryProps {
@@ -18,6 +20,8 @@ export function MealSummary({ mealType, entries, date }: MealSummaryProps) {
   const [expanded, setExpanded] = useState(true)
   const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null)
   const [deletingEntry, setDeletingEntry] = useState<LogEntry | null>(null)
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
+  const [showCopyMeal, setShowCopyMeal] = useState(false)
   const deleteEntry = useDeleteLogEntry()
   const updateEntry = useUpdateLogEntry()
 
@@ -90,31 +94,52 @@ export function MealSummary({ mealType, entries, date }: MealSummaryProps) {
   return (
     <>
       <div className="rounded-lg border border-border bg-card">
-        <button
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-          className="flex w-full items-center justify-between p-3"
-        >
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between p-3">
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            className="flex flex-1 items-center gap-2"
+          >
             <span className="font-medium text-foreground">
               {MEAL_LABELS[mealType]}
             </span>
             <span className="text-xs text-muted-foreground">
               {entries.length} item{entries.length !== 1 ? 's' : ''}
             </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-primary">
+          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setShowSaveTemplate(true)}
+              title="Save as template"
+              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowCopyMeal(true)}
+              title="Copy meal to today"
+              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </button>
+            <span className="ml-1 text-sm font-semibold text-primary">
               {Math.round(totalCals)} cal
             </span>
-            <ChevronDown
-              className={cn(
-                'h-4 w-4 text-muted-foreground transition-transform',
-                expanded && 'rotate-180'
-              )}
-            />
+            <button
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+            >
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 text-muted-foreground transition-transform',
+                  expanded && 'rotate-180'
+                )}
+              />
+            </button>
           </div>
-        </button>
+        </div>
 
         {expanded && (
           <div className="border-t border-border">
@@ -177,6 +202,29 @@ export function MealSummary({ mealType, entries, date }: MealSummaryProps) {
           onConfirm={handleConfirmDelete}
           onCancel={() => setDeletingEntry(null)}
           isPending={deleteEntry.isPending}
+        />
+      )}
+
+      {showSaveTemplate && (
+        <CreateTemplateSheet
+          prefillName={MEAL_LABELS[mealType]}
+          prefillItems={entries
+            .filter((e) => e.food_id)
+            .map((e) => ({
+              food: entryAsFood(e),
+              servingQty: e.serving_qty ?? 1,
+            }))}
+          onDone={() => setShowSaveTemplate(false)}
+          onCancel={() => setShowSaveTemplate(false)}
+        />
+      )}
+
+      {showCopyMeal && (
+        <CopyMealSheet
+          entries={entries}
+          mealType={mealType}
+          onDone={() => setShowCopyMeal(false)}
+          onCancel={() => setShowCopyMeal(false)}
         />
       )}
     </>

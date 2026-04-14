@@ -1,21 +1,24 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ScanBarcode, Plus, Star, Clock } from 'lucide-react'
+import { Search, ScanBarcode, Plus, Star, Clock, Bookmark } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MealTypeSelector } from '@/components/log/MealTypeSelector'
 import { PortionSheet } from '@/components/log/PortionSheet'
 import { FoodCard } from '@/components/food/FoodCard'
+import { TemplateCard } from '@/components/templates/TemplateCard'
+import { UseTemplateSheet } from '@/components/templates/UseTemplateSheet'
 import { useFoodSearch, useFavorites, useRecentFoods } from '@/hooks/useFoodSearch'
+import { useMealTemplates } from '@/hooks/useMealTemplates'
 import { useAddLogEntry } from '@/hooks/useLogEntries'
 import { useCreateFood } from '@/hooks/useFoods'
 import { getDefaultMealType, type MealType } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import type { Food } from '@/types'
+import type { Food, MealTemplate } from '@/types'
 import type { USDASearchResult } from '@/lib/usda'
 
-type FilterMode = 'search' | 'favorites' | 'recents'
+type FilterMode = 'search' | 'favorites' | 'recents' | 'templates'
 
 export default function LogFood() {
   const navigate = useNavigate()
@@ -24,10 +27,12 @@ export default function LogFood() {
   const [filterMode, setFilterMode] = useState<FilterMode>('search')
   const [selectedFood, setSelectedFood] = useState<Food | USDASearchResult | null>(null)
   const [pendingUSDA, setPendingUSDA] = useState<USDASearchResult | null>(null)
+  const [usingTemplate, setUsingTemplate] = useState<MealTemplate | null>(null)
 
   const { localResults, usdaResults, isLoading, isSearching } = useFoodSearch(searchQuery)
   const { data: favorites } = useFavorites()
   const { data: recents } = useRecentFoods()
+  const { data: templates } = useMealTemplates()
   const addLogEntry = useAddLogEntry()
   const createFood = useCreateFood()
 
@@ -100,6 +105,7 @@ export default function LogFood() {
   const showSearch = filterMode === 'search'
   const showFavorites = filterMode === 'favorites'
   const showRecents = filterMode === 'recents'
+  const showTemplates = filterMode === 'templates'
 
   return (
     <div className="mx-auto max-w-lg p-4 pt-6">
@@ -126,6 +132,12 @@ export default function LogFood() {
           onClick={() => setFilterMode('recents')}
           icon={<Clock className="h-3.5 w-3.5" />}
           label="Recents"
+        />
+        <FilterTab
+          active={showTemplates}
+          onClick={() => setFilterMode('templates')}
+          icon={<Bookmark className="h-3.5 w-3.5" />}
+          label="Templates"
         />
       </div>
 
@@ -259,6 +271,29 @@ export default function LogFood() {
             )}
           </>
         )}
+
+        {/* Templates mode */}
+        {showTemplates && (
+          <>
+            {!templates?.length ? (
+              <div className="py-12 text-center">
+                <Bookmark className="mx-auto h-8 w-8 text-muted-foreground/40" />
+                <p className="mt-2 text-sm text-muted-foreground">No templates yet</p>
+                <p className="mt-1 text-xs text-muted-foreground/60">
+                  Save a meal from the dashboard to create one
+                </p>
+              </div>
+            ) : (
+              templates.map((t) => (
+                <TemplateCard
+                  key={t.id}
+                  template={t}
+                  onUse={() => setUsingTemplate(t)}
+                />
+              ))
+            )}
+          </>
+        )}
       </div>
 
       {selectedFood && (
@@ -270,6 +305,14 @@ export default function LogFood() {
             setPendingUSDA(null)
           }}
           isPending={addLogEntry.isPending || createFood.isPending}
+        />
+      )}
+
+      {usingTemplate && (
+        <UseTemplateSheet
+          template={usingTemplate}
+          onDone={() => setUsingTemplate(null)}
+          onCancel={() => setUsingTemplate(null)}
         />
       )}
     </div>

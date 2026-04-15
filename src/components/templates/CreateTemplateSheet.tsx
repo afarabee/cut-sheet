@@ -1,10 +1,13 @@
-import { useState } from 'react'
-import { Search, X, Minus, Plus } from 'lucide-react'
+import { lazy, Suspense, useState } from 'react'
+import { Search, ScanBarcode, X, Minus, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FoodCard } from '@/components/food/FoodCard'
 import { CreateFoodSheet } from '@/components/food/CreateFoodSheet'
+const BarcodeScanSheet = lazy(() =>
+  import('@/components/food/BarcodeScanSheet').then((m) => ({ default: m.BarcodeScanSheet }))
+)
 import { useFoodSearch } from '@/hooks/useFoodSearch'
 import { useCreateTemplate } from '@/hooks/useMealTemplates'
 import type { Food } from '@/types'
@@ -33,6 +36,8 @@ export function CreateTemplateSheet({
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(!prefillItems?.length)
   const [showCreateFood, setShowCreateFood] = useState(false)
+  const [showBarcodeScan, setShowBarcodeScan] = useState(false)
+  const [createFoodBarcode, setCreateFoodBarcode] = useState<string | null>(null)
 
   const { localResults, isSearching } = useFoodSearch(searchQuery)
   const createTemplate = useCreateTemplate()
@@ -166,14 +171,24 @@ export function CreateTemplateSheet({
         {/* Add foods */}
         {showSearch ? (
           <div className="mt-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search foods to add..."
-                className="pl-9"
-              />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search foods to add..."
+                  className="pl-9"
+                />
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowBarcodeScan(true)}
+                title="Scan barcode"
+              >
+                <ScanBarcode className="h-4 w-4" />
+              </Button>
             </div>
             {isSearching && localResults.length > 0 && (
               <div className="mt-2 flex max-h-48 flex-col gap-1 overflow-y-auto">
@@ -227,14 +242,37 @@ export function CreateTemplateSheet({
 
     {showCreateFood && (
       <CreateFoodSheet
-        initialName={searchQuery}
+        initialName={createFoodBarcode ? undefined : searchQuery}
+        initialBarcode={createFoodBarcode ?? undefined}
         onCreated={(food) => {
           setShowCreateFood(false)
           setSearchQuery('')
+          setCreateFoodBarcode(null)
           addFood(food)
         }}
-        onCancel={() => setShowCreateFood(false)}
+        onCancel={() => {
+          setShowCreateFood(false)
+          setCreateFoodBarcode(null)
+        }}
       />
+    )}
+
+    {showBarcodeScan && (
+      <Suspense fallback={null}>
+        <BarcodeScanSheet
+          onFound={(food) => {
+            setShowBarcodeScan(false)
+            addFood(food)
+            toast.success(`${food.name} added to template`)
+          }}
+          onCreateManually={(barcode) => {
+            setShowBarcodeScan(false)
+            setCreateFoodBarcode(barcode)
+            setShowCreateFood(true)
+          }}
+          onCancel={() => setShowBarcodeScan(false)}
+        />
+      </Suspense>
     )}
     </>
   )

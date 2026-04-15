@@ -65,6 +65,7 @@ export function FoodForm({
       fiber_g: fiber ? Number(fiber) : null,
       total_sugars_g: totalSugars ? Number(totalSugars) : null,
       source: initialValues?.source ?? 'custom',
+      barcode: initialValues?.barcode ?? null,
       is_favorite: isFavorite,
     })
   }

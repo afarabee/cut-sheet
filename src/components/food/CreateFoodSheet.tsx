@@ -6,12 +6,20 @@ import type { Food, FoodInput } from '@/types'
 
 interface CreateFoodSheetProps {
   initialName?: string
+  initialBarcode?: string
   onCreated: (food: Food) => void
   onCancel: () => void
 }
 
-export function CreateFoodSheet({ initialName, onCreated, onCancel }: CreateFoodSheetProps) {
+export function CreateFoodSheet({ initialName, initialBarcode, onCreated, onCancel }: CreateFoodSheetProps) {
   const createFood = useCreateFood()
+
+  const initialValues: Partial<FoodInput> | undefined = initialName || initialBarcode
+    ? {
+        ...(initialName ? { name: initialName } : {}),
+        ...(initialBarcode ? { barcode: initialBarcode, source: 'barcode' as const } : {}),
+      }
+    : undefined
 
   const handleSubmit = (input: FoodInput) => {
     createFood.mutate(input, {
@@ -37,7 +45,7 @@ export function CreateFoodSheet({ initialName, onCreated, onCancel }: CreateFood
         </h3>
 
         <FoodForm
-          initialValues={initialName ? { name: initialName } : undefined}
+          initialValues={initialValues}
           onSubmit={handleSubmit}
           isPending={createFood.isPending}
           submitLabel="Save & Continue"

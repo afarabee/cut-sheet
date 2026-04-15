@@ -9,6 +9,8 @@ import { PortionSheet } from '@/components/log/PortionSheet'
 import { FoodCard } from '@/components/food/FoodCard'
 import { TemplateCard } from '@/components/templates/TemplateCard'
 import { UseTemplateSheet } from '@/components/templates/UseTemplateSheet'
+import { CreateTemplateSheet } from '@/components/templates/CreateTemplateSheet'
+import { CreateFoodSheet } from '@/components/food/CreateFoodSheet'
 import { useFoodSearch, useFavorites, useRecentFoods } from '@/hooks/useFoodSearch'
 import { useMealTemplates } from '@/hooks/useMealTemplates'
 import { useAddLogEntry } from '@/hooks/useLogEntries'
@@ -28,6 +30,8 @@ export default function LogFood() {
   const [selectedFood, setSelectedFood] = useState<Food | USDASearchResult | null>(null)
   const [pendingUSDA, setPendingUSDA] = useState<USDASearchResult | null>(null)
   const [usingTemplate, setUsingTemplate] = useState<MealTemplate | null>(null)
+  const [showCreateTemplate, setShowCreateTemplate] = useState(false)
+  const [showCreateFood, setShowCreateFood] = useState(false)
 
   const { localResults, usdaResults, isLoading, isSearching } = useFoodSearch(searchQuery)
   const { data: favorites } = useFavorites()
@@ -184,9 +188,16 @@ export default function LogFood() {
             )}
 
             {!isLoading && isSearching && localResults.length === 0 && usdaResults.length === 0 && (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                No results found
-              </p>
+              <div className="flex flex-col items-center gap-3 py-8">
+                <p className="text-sm text-muted-foreground">No results found</p>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCreateFood(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Create "{searchQuery}" as custom food
+                </Button>
+              </div>
             )}
 
             {localResults.length > 0 && (
@@ -275,12 +286,20 @@ export default function LogFood() {
         {/* Templates mode */}
         {showTemplates && (
           <>
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateTemplate(true)}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4" />
+              Create Template
+            </Button>
             {!templates?.length ? (
-              <div className="py-12 text-center">
+              <div className="py-8 text-center">
                 <Bookmark className="mx-auto h-8 w-8 text-muted-foreground/40" />
                 <p className="mt-2 text-sm text-muted-foreground">No templates yet</p>
                 <p className="mt-1 text-xs text-muted-foreground/60">
-                  Save a meal from the dashboard to create one
+                  Create one above, or save a meal from the dashboard
                 </p>
               </div>
             ) : (
@@ -313,6 +332,27 @@ export default function LogFood() {
           template={usingTemplate}
           onDone={() => setUsingTemplate(null)}
           onCancel={() => setUsingTemplate(null)}
+        />
+      )}
+
+      {showCreateTemplate && (
+        <CreateTemplateSheet
+          onDone={() => setShowCreateTemplate(false)}
+          onCancel={() => setShowCreateTemplate(false)}
+        />
+      )}
+
+      {showCreateFood && (
+        <CreateFoodSheet
+          initialName={searchQuery}
+          onCreated={(food) => {
+            setShowCreateFood(false)
+            setSearchQuery('')
+            // Auto-open portion sheet so user can log the newly-created food
+            setSelectedFood(food)
+            setPendingUSDA(null)
+          }}
+          onCancel={() => setShowCreateFood(false)}
         />
       )}
     </div>

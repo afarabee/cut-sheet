@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FoodCard } from '@/components/food/FoodCard'
+import { CreateFoodSheet } from '@/components/food/CreateFoodSheet'
 import { useFoodSearch } from '@/hooks/useFoodSearch'
 import { useCreateTemplate } from '@/hooks/useMealTemplates'
 import type { Food } from '@/types'
@@ -31,6 +32,7 @@ export function CreateTemplateSheet({
   const [items, setItems] = useState<TemplateItem[]>(prefillItems ?? [])
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(!prefillItems?.length)
+  const [showCreateFood, setShowCreateFood] = useState(false)
 
   const { localResults, isSearching } = useFoodSearch(searchQuery)
   const createTemplate = useCreateTemplate()
@@ -92,6 +94,7 @@ export function CreateTemplateSheet({
   }
 
   return (
+    <>
     <div className="fixed inset-0 z-[60] flex items-end" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
@@ -183,6 +186,19 @@ export function CreateTemplateSheet({
                 ))}
               </div>
             )}
+            {isSearching && localResults.length === 0 && (
+              <div className="mt-3 flex flex-col items-center gap-2">
+                <p className="text-xs text-muted-foreground">No matches in your library</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCreateFood(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Create "{searchQuery}"
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <Button
@@ -208,5 +224,18 @@ export function CreateTemplateSheet({
         </div>
       </div>
     </div>
+
+    {showCreateFood && (
+      <CreateFoodSheet
+        initialName={searchQuery}
+        onCreated={(food) => {
+          setShowCreateFood(false)
+          setSearchQuery('')
+          addFood(food)
+        }}
+        onCancel={() => setShowCreateFood(false)}
+      />
+    )}
+    </>
   )
 }
